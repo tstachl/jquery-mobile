@@ -467,9 +467,9 @@ if ( eventCaptureSupported ) {
 					o = clickBlockList[ i ];
 					touchID = 0;
 
-					if ( clickBlockList[i].parentPage.get(0) != $.mobile.activePage.get(0)
+					if ( clickBlockList[i].parentPage.get( 0 ) != $.mobile.activePage.get( 0 )
 					  || ( ele === target && Math.abs( o.x - x ) < threshold && Math.abs( o.y - y ) < threshold ) 
-						|| $.data( ele, touchTargetPropertyName ) === o.touchID ) {
+					  || $.data( ele, touchTargetPropertyName ) === o.touchID ) {
 
 						e.preventDefault();
 						e.stopPropagation();
