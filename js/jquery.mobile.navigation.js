@@ -884,7 +884,7 @@
 		}
 
 		// Set the location hash.
-		if( settings.changeHash !== false && url && path.stripHash( location.hashi ) != url ) {
+		if( settings.changeHash !== false && url && path.stripHash( location.hash ) != url ) {
 			//disable hash listening temporarily
 			urlHistory.ignoreNextHashChange = true;
 			//update hash and history
