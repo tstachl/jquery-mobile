@@ -471,10 +471,9 @@ if ( eventCaptureSupported ) {
 					  || ( ele === target && Math.abs( o.x - x ) < threshold && Math.abs( o.y - y ) < threshold ) 
 						|| $.data( ele, touchTargetPropertyName ) === o.touchID ) {
 
-						// XXX: We may want to consider removing matches from the block list
-						//      instead of waiting for the reset timer to fire.
 						e.preventDefault();
 						e.stopPropagation();
+						clickBlockList.splice( i, 1 );
 						return;
 					}
 				}
