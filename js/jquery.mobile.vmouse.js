@@ -272,6 +272,7 @@ function handleTouchEnd( event ) {
 			t = getNativeEvent( event ).changedTouches[ 0 ];
 			clickBlockList.push({
 				touchID: lastTouchID,
+				parentPage: $( event.target ).closest( ":jqmData(role='page')" ),
 				x: t.clientX,
 				y: t.clientY
 			});
@@ -466,8 +467,10 @@ if ( eventCaptureSupported ) {
 					o = clickBlockList[ i ];
 					touchID = 0;
 
-					if ( ( ele === target && Math.abs( o.x - x ) < threshold && Math.abs( o.y - y ) < threshold ) ||
-								$.data( ele, touchTargetPropertyName ) === o.touchID ) {
+					if ( clickBlockList[i].parentPage.get(0) != $.mobile.activePage.get(0)
+					  || ( ele === target && Math.abs( o.x - x ) < threshold && Math.abs( o.y - y ) < threshold ) 
+						|| $.data( ele, touchTargetPropertyName ) === o.touchID ) {
+
 						// XXX: We may want to consider removing matches from the block list
 						//      instead of waiting for the reset timer to fire.
 						e.preventDefault();
