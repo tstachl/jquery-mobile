@@ -1141,9 +1141,7 @@
 			$.mobile.changePage( href, { transition: transition, reverse: reverse, role: role } );
 			event.preventDefault();
 		});
-		
-<<<<<<< HEAD
-		
+				
 		// Popstate is disabled until after window onload
 		// This is to avoid the initial popstate call that occurs in Chrome at load
 		$window.bind( "load", function(){
@@ -1151,7 +1149,7 @@
 				urlHistory.ignoreNextPopState = false;
 			}, 0 );
 		});
-=======
+
 		//prefetch pages when anchors with data-prefetch are encountered
 		$( ".ui-page" ).live( "pageshow.prefetch", function(){
 			var urls = [];
@@ -1163,7 +1161,6 @@
 				}
 			});
 		} );
->>>>>>> f70a9475527592694356c923d158c29c65e3124c
 
 		//hashchange and popstate event handler
 		$window.bind( "hashchange popstate", function( e, triggered ) {
