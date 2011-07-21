@@ -7,6 +7,13 @@
 
 (function( $, undefined ) {
 
+//auto self-init widgets
+$( document ).bind( "pagecreate enhance", function( e ){
+	$( "select:not(:jqmData(role='slider'))", e.target )
+		.not( ":jqmData(role='none'), :jqmData(role='nojs')" )
+		.selectmenu();
+});
+
 $.widget( "mobile.selectmenu", $.mobile.widget, {
 	options: {
 		theme: null,
@@ -100,7 +107,7 @@ $.widget( "mobile.selectmenu", $.mobile.widget, {
 				screen = $( "<div>", {"class": "ui-selectmenu-screen ui-screen-hidden"})
 							.appendTo( thisPage ),
 
-				listbox = $( "<div>", { "class": "ui-selectmenu ui-selectmenu-hidden ui-overlay-shadow ui-corner-all pop ui-body-" + o.overlayTheme } )
+				listbox = $("<div>", { "class": "ui-selectmenu ui-selectmenu-hidden ui-overlay-shadow ui-corner-all ui-body-" + o.overlayTheme + " " + $.mobile.defaultDialogTransition })
 						.insertAfter(screen),
 
 				list = $( "<ul>", {
@@ -306,6 +313,13 @@ $.widget( "mobile.selectmenu", $.mobile.widget, {
 				}
 			});
 
+			// button refocus ensures proper height calculation
+			// by removing the inline style and ensuring page inclusion
+			self.menuPage.bind( "pagehide", function(){
+				self.list.appendTo( self.listbox );
+				self._focusButton();
+			});
+
 			// Events on "screen" overlay
 			screen.bind( "vclick", function( event ) {
 				self.close();
@@ -317,7 +331,7 @@ $.widget( "mobile.selectmenu", $.mobile.widget, {
 					self.close();
 					return false;
 				}
-			})
+			});
 		}
 	},
 
@@ -498,7 +512,7 @@ $.widget( "mobile.selectmenu", $.mobile.widget, {
 			self.menuType = "page";
 			self.menuPageContent.append( self.list );
 			$.mobile.changePage( self.menuPage, {
-				transition: "pop"
+			   transition: $.mobile.defaultDialogTransition
 			});
 		} else {
 
@@ -552,6 +566,13 @@ $.widget( "mobile.selectmenu", $.mobile.widget, {
 		}
 	},
 
+	_focusButton : function(){
+		var self = this;
+		setTimeout(function() {
+			self.button.focus();
+		}, 40);
+	},
+
 	close: function() {
 		if ( this.options.disabled || !this.isOpen || this.options.nativeMenu ) {
 			return;
@@ -559,19 +580,7 @@ $.widget( "mobile.selectmenu", $.mobile.widget, {
 
 		var self = this;
 
-		function focusButton() {
-			setTimeout(function() {
-				self.button.focus();
-			}, 40);
-
-			self.listbox.removeAttr( "style" ).append( self.list );
-		}
-
 		if ( self.menuType == "page" ) {
-			// button refocus ensures proper height calculation
-			// by removing the inline style and ensuring page inclusion
-			self.menuPage.one( "pagehide", focusButton);
-
 			// doesn't solve the possible issue with calling change page
 			// where the objects don't define data urls which prevents dialog key
 			// stripping - changePage has incoming refactor
@@ -580,7 +589,7 @@ $.widget( "mobile.selectmenu", $.mobile.widget, {
 		else{
 			self.screen.addClass( "ui-screen-hidden" );
 			self.listbox.addClass( "ui-selectmenu-hidden" ).removeAttr( "style" ).removeClass( "in" );
-			focusButton();
+			self._focusButton();
 		}
 
 		// allow the dialog to be closed again

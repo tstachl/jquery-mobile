@@ -3,6 +3,10 @@
  */
 
 (function($){
+	var onChangeCnt = 0;
+	window.onChangeCounter = function() {
+		onChangeCnt++;
+	}
 	module('jquery.mobile.slider.js');
 
 	var keypressTest = function(opts){
@@ -95,6 +99,10 @@
 		slider.keyup();
 		same(slider.val(), "200");
 	});
+	
+	test( "input type should degrade to number when slider is created", function(){
+		same($("#range-slider-up").attr( "type" ), "number");
+	});
 
 	// generic switch test function
 	var sliderSwitchTest = function(opts){
@@ -136,5 +144,21 @@
 			finish: 'off',
 		  keyCodes: ['DOWN', 'LEFT', 'PAGE_DOWN', 'HOME']
 		});
+	});
+
+	test( "onchange should not be called on create", function(){
+		equals(onChangeCnt, 0, "onChange should not have been called");
+	});
+
+	test( "onchange should be called onchange", function(){
+		onChangeCnt = 0;
+		$( "#onchange" ).slider( "refresh", 50 );
+		equals(onChangeCnt, 1, "onChange should have been called once");
+	});
+	
+	
+	test( "slider controls will create when inside a container that receives an 'enhance' event", function(){
+		ok( !$("#enhancetest").appendTo(".ui-page-active").find(".ui-slider").length, "did not have enhancements applied" );
+		ok( $("#enhancetest").trigger("enhance").find(".ui-slider").length, "enhancements applied" );
 	});
 })(jQuery);

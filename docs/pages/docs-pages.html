@@ -35,6 +35,9 @@
 &lt;html&gt; 
 	&lt;head&gt; 
 	&lt;title&gt;Page Title&lt;/title&gt; 
+	
+	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt; 
+
 	&lt;link rel=&quot;stylesheet&quot; href=&quot;http://code.jquery.com/mobile/1.0b1/jquery.mobile-1.0b1.min.css&quot; /&gt;
 	&lt;script type=&quot;text/javascript&quot; src=&quot;http://code.jquery.com/jquery-1.6.1.min.js&quot;&gt;&lt;/script&gt;
 	&lt;script type=&quot;text/javascript&quot; src=&quot;http://code.jquery.com/mobile/1.0b1/jquery.mobile-1.0b1.min.js&quot;&gt;&lt;/script&gt;
@@ -46,6 +49,8 @@
 &lt;/body&gt;
 &lt;/html&gt;
 </code></pre>
+			
+			<p>Note that you should also include a meta <code>viewport</code> tag in the <code>head</code> to specify how the browser should display your page zoom level and dimensions. If this isn't set, many mobile browsers will use a "virtual" page width around 900 pixels to make it work well with exisitng desktop sites but the screens may look zoomed out and too wide. By setting the <code>content=&quot;width=device-width, initial-scale=1</code> in the code example above, the width will be set to the pixel width of the device screen. These settings do not disable the user's ability to zoom the pages which is nice from an accessibility perspective. There is a minor issue in iOS that doesn't properly set the width when changing orientations with these viewport settings, but this will hopefully be fixed a a future release. You can set other viewport values to disable zooming if required since this is part of your page content, not the library. </p>
 
 			<p>Inside the <code>&lt;body&gt;</code> tag, each view or "page" on the mobile device is identified with an element (usually a <code>div</code>) with the <code> data-role="page"</code> attribute:</p> 
 
@@ -77,6 +82,9 @@
 &lt;html&gt; 
 	&lt;head&gt; 
 	&lt;title&gt;Page Title&lt;/title&gt; 
+	
+	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt; 
+
 	&lt;link rel=&quot;stylesheet&quot; href=&quot;http://code.jquery.com/mobile/1.0b1/jquery.mobile-1.0b1.min.css&quot; /&gt;
 	&lt;script type=&quot;text/javascript&quot; src=&quot;http://code.jquery.com/jquery-1.6.1.min.js&quot;&gt;&lt;/script&gt;
 	&lt;script type=&quot;text/javascript&quot; src=&quot;http://code.jquery.com/mobile/1.0b1/jquery.mobile-1.0b1.min.js&quot;&gt;&lt;/script&gt;
@@ -184,12 +192,25 @@
 		
 		<p>However, you can work around this issue by returning your page div with a <code>data-url</code> attribute already specified. When you do this, jQuery Mobile will use that attribute's value for updating the URL, instead of the url used to request that page. This also allows you to return urls that change as the result of a redirect, for example, you might post a form to "/login.html" but return a page from the url "/account" after a successful submission. This tool allows you to take control of the jQuery Mobile history stack in these situations. Here's an example:</p>
 		
-		<p>The following link points to "docs-links-urltest/index.html": <a href="docs-links-urltest/index.html">Test Link</a> which is a directory with an index page. The return page will update the hash as "docs/pages/docs-links-urltest/" with a trailing slash. This is done via the data-url attribute in that page's source. Keep in mind that the value will replace the entire hash, and it is up to you to replace it with a URL that actually resolves to the correct page when requested via refresh or deep link.</p>
+		<p>The following link points to "docs-links-urltest/index.html": <a href="docs-links-urltest/index.html">Test Link</a> which is a directory with an index page. The return page will update the hash as "/docs/pages/docs-links-urltest/" with a trailing slash. This is done via the data-url attribute in that page's source. Keep in mind that the value will replace the entire hash, and it is up to you to replace it with a URL that actually resolves to the correct page when requested via refresh or deep link.</p>
 		
 		
 		<p>Learn more about the technical details of the navigation model and <a href="docs-navmodel.html">Ajax, hashes and history</a> in jQuery mobile.</p>
 		
+		<h2>Automatically Pre-fetching Pages</h2>
+		<p>Any HTML anchor element may specify that its page be prefetched by jQuery Mobile through the use of a data-prefetch attribute. After pagecreate, jQuery Mobile will
+			automatically find all links in a page that have an attribute of <code>data-prefetch</code> and automatically load that page so it's available as soon as the user
+			navigates to it.</p> 
+			
+			<p>Pre-fetching links will naturally cause additional HTTP requests that may never be used, so it's important to use this feature only in situations where it's highly 
+				likely that a page will be visited.</p>
+		
+	
+<pre><code>
+ &lt;a href="foo/bar/baz" data-prefetch&gt;link text&lt;/a&gt;
+</code></pre>
 
+<p>Pages can also be pre-fetched programmatically by calling <code>$.mobile.loadpage( url )</code></p>
 
 
 				</div><!--/content-primary -->		
@@ -204,6 +225,8 @@
 
 								<li data-role="list-divider">Pages &amp; Dialogs</li>
 								<li data-theme="a"><a href="docs-pages.html">Anatomy of a page</a></li>
+								<li><a href="page-template.html" data-ajax="false">Single page template</a></li>
+								<li><a href="multipage-template.html" data-ajax="false">Multi-page template</a></li>
 								<li><a href="docs-transitions.html">Page transitions</a></li>
 								<li><a href="docs-dialogs.html">Dialogs</a></li>
 								<li><a href="docs-navmodel.html">Navigation: Ajax, hashes &amp; history</a></li>

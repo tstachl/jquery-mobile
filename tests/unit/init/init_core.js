@@ -201,5 +201,29 @@
 				start();
 			}, 500);
 		});
+		
+		asyncTest( "page loading should contain custom loading message when set during runtime", function(){
+			$.mobile.loadingMessage = "bar";
+			$.mobile.pageLoading(false);
+
+			setTimeout(function(){
+				same($(".ui-loader h1").text(), "bar");
+				start();
+			}, 500);
+		});
+
+		
+		asyncTest( "page element is generated when not present in ajax'd markup", function(){
+			expect( 1 );
+			$.mobile.changePage( "nopage.html" );
+			
+			$( ":jqmData(url$='nopage.html')" ).live( "pagecreate", function(){
+					ok(true, "page was created from dynamically loaded HTML that contained no page div" );
+					start();
+			} );
+		});
+		
+		
+		
 	});
 })(jQuery);

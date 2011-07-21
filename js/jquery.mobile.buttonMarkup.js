@@ -40,7 +40,7 @@ $.fn.buttonMarkup = function( options ) {
 
 			iconClass = "ui-icon " + o.icon;
 
-			if ( o.shadow ) {
+			if ( o.iconshadow ) {
 				iconClass += " ui-icon-shadow";
 			}
 		}
@@ -137,5 +137,14 @@ var attachEvents = function() {
 
 	attachEvents = null;
 };
+
+//links in bars, or those with  data-role become buttons
+//auto self-init widgets
+$( document ).bind( "pagecreate enhance", function( e ){
+
+	$( ":jqmData(role='button'), .ui-bar > a, .ui-header > a, .ui-footer > a", e.target )
+		.not( ".ui-btn, :jqmData(role='none'), :jqmData(role='nojs')" )
+		.buttonMarkup();
+});
 
 })( jQuery );

@@ -6,6 +6,11 @@
 */
 (function( $, undefined ) {
 
+//auto self-init widgets
+$( document ).bind( "pagecreate enhance", function( e ){
+	$( ":jqmData(role='collapsible')", e.target ).collapsible();
+});
+
 $.widget( "mobile.collapsible", $.mobile.widget, {
 	options: {
 		expandCueText: " click to expand contents",
@@ -132,7 +137,7 @@ $.widget( "mobile.collapsible", $.mobile.widget, {
 
 				});
 
-			var set = collapsibleParent.find( ":jqmData(role='collapsible'):first" );
+			var set = collapsibleParent.children( ":jqmData(role='collapsible')" );
 
 			set.first()
 				.find( "a:eq(0)" )

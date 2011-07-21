@@ -7,6 +7,13 @@
 
 (function( $, undefined ) {
 
+//auto self-init widgets
+$( document ).bind( "pagecreate enhance", function( e ){
+	$( "input[type='checkbox'],input[type='radio']", e.target )
+		.not( ":jqmData(role='none'), :jqmData(role='nojs')" )
+		.checkboxradio();
+});
+
 $.widget( "mobile.checkboxradio", $.mobile.widget, {
 	options: {
 		theme: null
@@ -128,8 +135,11 @@ $.widget( "mobile.checkboxradio", $.mobile.widget, {
 	},
 
 	//returns either a set of radios with the same name attribute, or a single checkbox
-	_getInputSet: function() {
-		return this.element.closest( "form,fieldset,:jqmData(role='page')" )
+	_getInputSet: function(){
+        if(this.inputtype == "checkbox") {
+            return this.element;
+        }
+        return this.element.closest( "form,fieldset,:jqmData(role='page')" )
 				.find( "input[name='"+ this.element.attr( "name" ) +"'][type='"+ this.inputtype +"']" );
 	},
 
