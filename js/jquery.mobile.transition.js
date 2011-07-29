@@ -18,6 +18,7 @@
  * disable it completely (by passing 0 or false).
  */
 $.fn.jqmTransition = function( classes, callback, timeout ) {
+	console.log("jqmTransition( '"+classes+"')" );
 	if ( typeof timeout == "undefined" ) {
 		timeout = 1000;
 	}
@@ -32,7 +33,7 @@ $.fn.jqmTransition = function( classes, callback, timeout ) {
 			$this.removeClass( "animate " + classes );
 			return result;
 		};
-		$this.one( "transitionend webkitTransitionEnd OTransitionEnd", handler );
+		$this.one( "transitionend webkitTransitionEnd OTransitionEnd webkitAnimationEnd", handler );
 		if ( timeout ) {
 			fallbackTimeout = setTimeout( handler, timeout );
 		}
@@ -40,7 +41,7 @@ $.fn.jqmTransition = function( classes, callback, timeout ) {
 		$this.addClass( classes );
 		setTimeout(function() {
 			$this.addClass( "animate" );
-		}, 25 );
+		}, 0 );
 		return $this;
 	} else {
 		// defer execution for consistency between webkit/non webkit
@@ -49,35 +50,46 @@ $.fn.jqmTransition = function( classes, callback, timeout ) {
 	}
 };
 
-function css3TransitionHandler(name, reverse, $to, $from) {
-	var deferred = new $.Deferred(),
-		reverseClass = reverse ? " reverse" : "",
-		viewportClass = "ui-mobile-viewport-transitioning viewport-" + name,
-		doneFunc = function() {
-			$to.add( $from ).removeClass( "out in reverse " + name );
-			if ( $from ) {
-				$from.removeClass( $.mobile.activePageClass );
-			}
-			$to.parent().removeClass( viewportClass );
+function makeCss3TransitionHandler(isTwoMovingParts) {
+	return function( name, reverse, $to, $from ) {
+		var deferred = new $.Deferred(),
+			reverseClass = reverse ? " reverse" : "",
+			viewportClass = "ui-mobile-viewport-transitioning viewport-" + name,
+			doneFunc = function() {
+				console.log( name + reverseClass + ": doneFunc()" );
+				$to.add( $from ).removeClass( "out in reverse " + name );
+				if ( $from ) {
+					$from.removeClass( $.mobile.activePageClass );
+				}
+				$to.parent().removeClass( viewportClass );
 
-			deferred.resolve( name, reverse, $to, $from );
-		};
+				deferred.resolve( name, reverse, $to, $from );
+			};
 
-	$to.parent().addClass( viewportClass );
-	if ( $from ) {
-		$from.jqmTransition( name + " out" + reverseClass );
+		$to.parent().addClass( viewportClass );
+		if ( $from ) {
+			$from.jqmTransition( name + " out" + reverseClass, ( !isTwoMovingParts || reverse )?doneFunc:undefined);
+		}
+		$to.addClass( $.mobile.activePageClass );
+		if ( ( isTwoMovingParts || !reverse ) ) {
+			$to.jqmTransition( name + " in" + reverseClass, doneFunc );
+		}
+
+		return deferred.promise();
 	}
-	$to.addClass( $.mobile.activePageClass ).jqmTransition( name + " in" + reverseClass, doneFunc );
-
-	return deferred.promise();
 }
 
 // Make our transition handler public.
-$.mobile.css3TransitionHandler = css3TransitionHandler;
+$.mobile.css3TransitionHandler = makeCss3TransitionHandler();
 
 // If the default transition handler is the 'none' handler, replace it with our handler.
 if ( $.mobile.defaultTransitionHandler === $.mobile.noneTransitionHandler ) {
-	$.mobile.defaultTransitionHandler = css3TransitionHandler;
+	$.mobile.defaultTransitionHandler = $.mobile.css3TransitionHandler;
+}
+
+// If the flip transition handler is the 'none' handler, replace it with our handler.
+if ( $.mobile.transitionHandlers.flip === $.mobile.noneTransitionHandler ) {
+	$.mobile.transitionHandlers.flip = makeCss3TransitionHandler(true);
 }
 
 })( jQuery, this );

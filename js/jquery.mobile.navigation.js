@@ -526,7 +526,8 @@
 
 	//transition handler dictionary for 3rd party transitions
 	$.mobile.transitionHandlers = {
-		none: $.mobile.defaultTransitionHandler
+		none: $.mobile.defaultTransitionHandler,
+		flip: $.mobile.noneTransitionHandler
 	};
 
 	//enable cross-domain page support
