@@ -6,6 +6,7 @@
 */
 
 (function( $, undefined ) {
+
 //Keeps track of the number of lists per page UID
 //This allows support for multiple nested list in the same page
 //https://github.com/jquery/jquery-mobile/issues/1617
@@ -19,7 +20,8 @@ $.widget( "mobile.listview", $.mobile.widget, {
 		dividerTheme: "b",
 		splitIcon: "arrow-r",
 		splitTheme: "b",
-		inset: false
+		inset: false,
+		initSelector: ":jqmData(role='listview')"
 	},
 
 	_create: function() {
@@ -56,11 +58,9 @@ $.widget( "mobile.listview", $.mobile.widget, {
 		
 		if ( which === "top" ) {
 			li.removeClass( top );
-		}
-		else if ( which === "bottom"  ) {
+		} else if ( which === "bottom" ) {
 			li.removeClass( bot );
-		}
-		else {
+		} else {
 			li.removeClass( top + " " + bot );
 		}
 	},
@@ -253,6 +253,11 @@ $.widget( "mobile.listview", $.mobile.widget, {
 
 		}).listview();
 	}
+});
+
+//auto self-init widgets
+$( document ).bind( "pagecreate create", function( e ){
+	$( $.mobile.listview.prototype.options.initSelector, e.target ).listview();
 });
 
 })( jQuery );

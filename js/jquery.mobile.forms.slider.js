@@ -11,7 +11,8 @@ $.widget( "mobile.slider", $.mobile.widget, {
 	options: {
 		theme: null,
 		trackTheme: null,
-		disabled: false
+		disabled: false,
+		initSelector: "input[type='range'], :jqmData(type='range'), :jqmData(role='slider')"
 	},
 
 	_create: function() {
@@ -312,5 +313,14 @@ $.widget( "mobile.slider", $.mobile.widget, {
 	}
 
 });
-})( jQuery );
 
+//auto self-init widgets
+$( document ).bind( "pagecreate create", function( e ){
+
+	$( $.mobile.slider.prototype.options.initSelector, e.target )
+		.not( ":jqmData(role='none'), :jqmData(role='nojs')" )
+		.slider();
+
+});
+
+})( jQuery );
