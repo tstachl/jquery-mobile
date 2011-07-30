@@ -49,12 +49,14 @@
 	asyncTest( "a large select menu should come up in a dialog many times", function(){
 		var menu, select = $("#select-choice-many-container a");
 
+		// if the second test doesn't run the dialog didn't come back up
+		expect( 2 );
+
 		$.testHelper.pageSequence([
 			function(){
 				// bring up the dialog
 				select.trigger("click");
 			},
-
 
 			function(){
 				menu = $("#select-choice-many-menu");
@@ -72,6 +74,7 @@
 			},
 
 			function(){
+				ok($.mobile.activePage.is(":jqmRole('dialog')"));
 				$.mobile.activePage.find(".ui-header .ui-btn").click();
 			},
 
