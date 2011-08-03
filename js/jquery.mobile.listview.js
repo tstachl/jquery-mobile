@@ -53,9 +53,9 @@ $.widget( "mobile.listview", $.mobile.widget, {
 	_removeCorners: function( li, which ) {
 		var top = "ui-corner-top ui-corner-tr ui-corner-tl",
 			bot = "ui-corner-bottom ui-corner-br ui-corner-bl";
-		
+
 		li = li.add( li.find( ".ui-btn-inner, .ui-li-link-alt, .ui-li-thumb" ) );
-		
+
 		if ( which === "top" ) {
 			li.removeClass( top );
 		} else if ( which === "bottom" ) {
@@ -66,6 +66,7 @@ $.widget( "mobile.listview", $.mobile.widget, {
 	},
 
 	refresh: function( create ) {
+		this.parentPage = this.element.closest( ".ui-page" );
 		this._createSubPages();
 
 		var o = this.options,
@@ -212,7 +213,8 @@ $.widget( "mobile.listview", $.mobile.widget, {
 			o = this.options,
 			dns = "data-" + $.mobile.ns,
 			self = this,
-			persistentFooterID = parentPage.find( ":jqmData(role='footer')" ).jqmData( "id" );
+			persistentFooterID = parentPage.find( ":jqmData(role='footer')" ).jqmData( "id" ),
+			hasSubPages;
 
 		if ( typeof listCountPerPage[ parentId ] === "undefined" ) {
 			listCountPerPage[ parentId ] = -1;
@@ -221,7 +223,8 @@ $.widget( "mobile.listview", $.mobile.widget, {
 		parentListId = parentListId || ++listCountPerPage[ parentId ];
 
 		$( parentList.find( "li>ul, li>ol" ).toArray().reverse() ).each(function( i ) {
-			var list = $( this ),
+			var self = this,
+				list = $( this ),
 				listId = list.attr( "id" ) || parentListId + "-" + i,
 				parent = list.parent(),
 				nodeEls = $( list.prevAll().toArray().reverse() ),
@@ -232,6 +235,8 @@ $.widget( "mobile.listview", $.mobile.widget, {
 				countTheme = list.jqmData( "counttheme" ) || parentList.jqmData( "counttheme" ) || o.countTheme,
 				newPage, anchor;
 
+			//define hasSubPages for use in later removal
+			hasSubPages = true;
 
 			newPage = list.detach()
 						.wrap( "<div " + dns + "role='page' " +	dns + "url='" + id + "' " + dns + "theme='" + theme + "' " + dns + "count-theme='" + countTheme + "'><div " + dns + "role='content'></div></div>" )
@@ -252,6 +257,33 @@ $.widget( "mobile.listview", $.mobile.widget, {
 			anchor.attr( "href", "#" + id );
 
 		}).listview();
+
+		//on pagehide, remove any nested pages along with the parent page, as long as they aren't active
+		if( hasSubPages && parentPage.data("page").options.domCache === false ){
+			var newRemove = function( e, ui ){
+				var nextPage = ui.nextPage, npURL;
+
+				if( ui.nextPage ){
+					npURL = nextPage.jqmData( "url" );
+					if( npURL.indexOf( parentUrl + "&" + $.mobile.subPageUrlKey ) !== 0 ){
+						self.childPages().remove();
+						parentPage.remove();
+					}
+				}
+			};
+
+			// unbind the original page remove and replace with our specialized version
+			parentPage
+				.unbind( "pagehide.remove" )
+				.bind( "pagehide.remove", newRemove);
+		}
+	},
+
+	// TODO sort out a better way to track sub pages of the listview this is brittle
+	childPages: function(){
+		var parentUrl = this.parentPage.jqmData( "url" );
+
+		return $( ":jqmData(url^='"+  parentUrl + "&" + $.mobile.subPageUrlKey +"')");
 	}
 });
 

@@ -237,7 +237,8 @@
 		//urlHistory is purely here to make guesses at whether the back or forward button was clicked
 		//and provide an appropriate transition
 		urlHistory = {
-			//array of pages that are visited during a single page load. each has a url and optional transition
+			// Array of pages that are visited during a single page load. 
+			// Each has a url and optional transition, title, and pageUrl (which represents the file path, in cases where URL is obscured, such as dialogs)
 			stack: [],
 
 			//maintain an index number for the active page in the stack
@@ -257,13 +258,13 @@
 			},
 
 			// addNew is used whenever a new page is added
-			addNew: function( url, transition, title, storedTo ) {
+			addNew: function( url, transition, title, pageUrl ) {
 				//if there's forward history, wipe it
 				if( urlHistory.getNext() ) {
 					urlHistory.clearForward();
 				}
 
-				urlHistory.stack.push( {url : url, transition: transition, title: title, page: storedTo } );
+				urlHistory.stack.push( {url : url, transition: transition, title: title, pageUrl: pageUrl } );
 
 				urlHistory.activeIndex = urlHistory.stack.length - 1;
 			},
@@ -616,7 +617,21 @@
 		}
 
 		if ( settings.showLoadMsg ) {
-			$.mobile.showPageLoadingMsg();
+			
+			// This configurable timeout allows cached pages a brief delay to load without showing a message
+			var loadMsgDelay = setTimeout(function(){
+					$.mobile.showPageLoadingMsg();
+				}, settings.loadMsgDelay ),
+				
+				// Shared logic for clearing timeout and removing message.
+				hideMsg = function(){
+					
+					// Stop message show timer
+					clearTimeout( loadMsgDelay );
+					
+					// Hide loading message
+					$.mobile.hidePageLoadingMsg();
+				};
 		}
 
 		if ( !( $.mobile.allowCrossDomainPages || path.isSameDomain( documentUrl, absUrl ) ) ) {
@@ -650,7 +665,7 @@
 						url = fileUrl = path.getFilePath( RegExp.$1 );
 					}
 					else{
-						
+
 					}
 
 					if ( base ) {
@@ -660,7 +675,7 @@
 					//workaround to allow scripts to execute when included in page divs
 					all.get( 0 ).innerHTML = html;
 					page = all.find( ":jqmData(role='page'), :jqmData(role='dialog')" ).first();
-					
+
 					//if page elem couldn't be found, create one and insert the body element's contents
 					if( !page.length ){
 						page = $( "<div data-" + $.mobile.ns + "role='page'>" + html.split( /<\/?body[^>]*>/gmi )[1] + "</div>" );
@@ -694,6 +709,17 @@
 						.attr( "data-" + $.mobile.ns + "url", path.convertUrlToDataUrl( fileUrl ) )
 						.appendTo( settings.pageContainer );
 
+					// wait for page creation to leverage options defined on widget
+					page.one('pagecreate', function(){
+
+						// when dom caching is not enabled bind to remove the page on hide
+						if( !page.data("page").options.domCache ){
+							page.bind( "pagehide.remove", function(){
+								$(this).remove();
+							});
+						}
+					});
+
 					enhancePage( page, settings.role );
 
 					// Enhancing the page may result in new dialogs/sub pages being inserted
@@ -703,9 +729,11 @@
 						page = settings.pageContainer.children( ":jqmData(url='" + dataUrl + "')" );
 					}
 
+					//bind pageHide to removePage after it's hidden, if the page options specify to do so
+
 					// Remove loading message.
 					if ( settings.showLoadMsg ) {
-						$.mobile.hidePageLoadingMsg();
+						hideMsg();
 					}
 
 					deferred.resolve( absUrl, options, page, dupCachedPage );
@@ -718,7 +746,9 @@
 
 					// Remove loading message.
 					if ( settings.showLoadMsg ) {
-						$.mobile.hidePageLoadingMsg();
+						
+						// Remove loading message.
+						hideMsg();
 
 						//show error message
 						$( "<div class='ui-loader ui-overlay-shadow ui-body-e ui-corner-all'><h1>"+ $.mobile.pageLoadErrorMessage +"</h1></div>" )
@@ -744,7 +774,8 @@
 		reloadPage: false,
 		role: undefined, // By default we rely on the role defined by the @data-role attribute.
 		showLoadMsg: false,
-		pageContainer: undefined
+		pageContainer: undefined,
+		loadMsgDelay: 50 // This delay allows loads that pull from browser cache to occur without showing the loading message.
 	};
 
 	// Show a specific page in the page container.
@@ -835,6 +866,8 @@
 		var mpc = settings.pageContainer,
 			fromPage = $.mobile.activePage,
 			url = toPage.jqmData( "url" ),
+			// The pageUrl var is usually the same as url, except when url is obscured as a dialog url. pageUrl always contains the file path
+			pageUrl = url,
 			fileUrl = path.getFilePath( url ),
 			active = urlHistory.getActive(),
 			activeIsInitialPage = urlHistory.activeIndex === 0,
@@ -904,7 +937,7 @@
 
 		//add page to history stack if it's not back or forward
 		if( !historyDir ) {
-			urlHistory.addNew( url, settings.transition, pageTitle, toPage );
+			urlHistory.addNew( url, settings.transition, pageTitle, pageUrl );
 		}
 
 		//set page title
@@ -1135,7 +1168,7 @@
 			$.mobile.changePage( href, { transition: transition, reverse: reverse, role: role } );
 			event.preventDefault();
 		});
-		
+
 		//prefetch pages when anchors with data-prefetch are encountered
 		$( ".ui-page" ).live( "pageshow.prefetch", function(){
 			var urls = [];
@@ -1179,13 +1212,13 @@
 					// prevent changepage
 					return;
 				} else {
-					var setTo = function() { to = $.mobile.urlHistory.getActive().page; };
+					var setTo = function() { to = $.mobile.urlHistory.getActive().pageUrl; };
 					// if the current active page is a dialog and we're navigating
 					// to a dialog use the dialog objected saved in the stack
 					urlHistory.directHashChange({	currentUrl: to, isBack: setTo, isForward: setTo	});
 				}
 			}
-
+			
 			//if to is defined, load it
 			if ( to ) {
 				to = ( typeof to === "string" && !path.isPath( to ) ) ? ( '#' + to ) : to;
