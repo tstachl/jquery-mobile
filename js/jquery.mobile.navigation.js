@@ -719,14 +719,14 @@
 						}
 					});
 
-					enhancePage( page, settings.role );
+					//enhancePage( page, settings.role );
 
 					// Enhancing the page may result in new dialogs/sub pages being inserted
 					// into the DOM. If the original absUrl refers to a sub-page, that is the
 					// real page we are interested in.
-					if ( absUrl.indexOf( "&" + $.mobile.subPageUrlKey ) > -1 ) {
-						page = settings.pageContainer.children( ":jqmData(url='" + dataUrl + "')" );
-					}
+					//if ( absUrl.indexOf( "&" + $.mobile.subPageUrlKey ) > -1 ) {
+					//	page = settings.pageContainer.children( ":jqmData(url='" + dataUrl + "')" );
+					//}
 
 					//bind pageHide to removePage after it's hidden, if the page options specify to do so
 
